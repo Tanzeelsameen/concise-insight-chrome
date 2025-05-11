@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const resultEl = document.getElementById('result');
   const summaryContent = document.getElementById('summary-content');
   const copyBtn = document.getElementById('copy-btn');
+  const emptyState = document.getElementById('empty-state');
   
   // Function to highlight the active button
   function setActiveButton(activeBtn) {
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Function to show loading state
   function showLoading() {
+    emptyState.style.display = 'none';
     loadingEl.style.display = 'flex';
     resultEl.style.display = 'none';
   }
@@ -26,8 +28,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to show result
   function showResult(summary) {
     loadingEl.style.display = 'none';
-    resultEl.style.display = 'block';
+    emptyState.style.display = 'none';
+    resultEl.style.display = 'flex';
     summaryContent.textContent = summary;
+  }
+  
+  // Function to show empty state
+  function showEmptyState() {
+    emptyState.style.display = 'block';
+    loadingEl.style.display = 'none';
+    resultEl.style.display = 'none';
   }
   
   // Function to get the current tab's content and request a summary
@@ -55,15 +65,17 @@ document.addEventListener('DOMContentLoaded', function() {
         title: pageTitle,
         type: type
       }, response => {
-        if (response.error) {
+        if (response && response.error) {
           showResult(`Error: ${response.error}`);
-        } else {
+        } else if (response && response.summary) {
           showResult(response.summary);
+        } else {
+          showResult('An unknown error occurred while summarizing the content.');
         }
       });
       
     } catch (error) {
-      showResult(`Error: ${error.message}`);
+      showResult(`Error: ${error.message || 'Unknown error'}`);
     }
   }
   
@@ -73,15 +85,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const article = document.querySelector('article') || 
                    document.querySelector('.article') || 
                    document.querySelector('.post') ||
+                   document.querySelector('.content') ||
                    document.querySelector('main') ||
                    document.body;
     
+    // Create a clone to modify without affecting the page
+    const clone = article.cloneNode(true);
+    
     // Remove unwanted elements
-    const elementsToRemove = article.querySelectorAll('aside, nav, footer, .ads, .comments, script, style');
+    const elementsToRemove = clone.querySelectorAll('aside, nav, footer, header, .ads, .comments, script, style, [role="complementary"], [role="navigation"]');
     elementsToRemove.forEach(el => el.remove());
     
     // Get the cleaned text content
-    return article.innerText.trim();
+    return clone.innerText.trim();
   }
   
   // Add event listeners to buttons
@@ -112,7 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Auto-trigger brief summary when popup opens
-  // Uncomment the line below if you want this behavior
-  // briefBtn.click();
+  // Show empty state on initial load
+  showEmptyState();
 });

@@ -6,12 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Content Summarizer</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header>
       <h1>AI Summarizer</h1>
-      <p class="subtitle">Summarize content with AI</p>
+      <p class="subtitle">Smart summaries at your fingertips</p>
     </header>
     
     <div class="summary-options">
@@ -30,10 +33,16 @@
     </div>
     
     <div class="summary-container">
+      <div class="empty-state" id="empty-state">
+        <span class="icon" style="font-size: 2rem;">✨</span>
+        <p>Select a summary type to begin</p>
+      </div>
+      
       <div class="loading-spinner" id="loading">
         <div class="spinner"></div>
         <p>Summarizing...</p>
       </div>
+      
       <div class="result-container" id="result">
         <div class="summary-content" id="summary-content"></div>
         <button class="copy-btn" id="copy-btn">
@@ -44,7 +53,7 @@
     </div>
     
     <footer>
-      <p>Powered by AI</p>
+      <p>Powered by Google Gemini AI</p>
     </footer>
   </div>
   <script src="popup.js"></script>

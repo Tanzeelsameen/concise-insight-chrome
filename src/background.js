@@ -1,7 +1,4 @@
 
-const API_KEY = 'AIzaSyDJuseopw7-gMY5QSSm4DZZVPv1I6X9b4E';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'summarize') {
@@ -10,61 +7,71 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ summary });
       })
       .catch(error => {
-        console.error('Summarization error:', error);
         sendResponse({ error: error.message });
       });
     
-    // Return true to indicate we'll respond asynchronously
+    // Return true to indicate we will send a response asynchronously
     return true;
   }
 });
 
+// Function to call the AI API for summarization
 async function summarizeContent(content, title, type) {
-  // Prepare the prompt based on the summary type
-  let prompt;
-  const maxContentLength = 8000; // Limit content length to avoid API issues
-  const truncatedContent = content.length > maxContentLength 
-    ? content.substring(0, maxContentLength) + '...' 
-    : content;
-  
-  switch (type) {
-    case 'brief':
-      prompt = `Summarize the following content from "${title}" in 2-3 concise sentences:\n\n${truncatedContent}`;
-      break;
-    case 'detailed':
-      prompt = `Provide a comprehensive summary of the following content from "${title}" in about 3-5 paragraphs, covering the key points and main arguments:\n\n${truncatedContent}`;
-      break;
-    case 'bullet':
-      prompt = `Summarize the following content from "${title}" as 5-7 bullet points, highlighting the most important information:\n\n${truncatedContent}`;
-      break;
-    default:
-      prompt = `Summarize the following content from "${title}" concisely:\n\n${truncatedContent}`;
-  }
-  
   try {
-    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+    console.log(`Summarizing content (${type}): ${title}`);
+    
+    // Prepare the prompt based on summary type
+    let prompt = '';
+    switch(type) {
+      case 'brief':
+        prompt = `Summarize this content in 2-3 concise sentences: "${content}"`;
+        break;
+      case 'detailed':
+        prompt = `Provide a detailed summary of this content in about 5-7 sentences, covering the main points: "${content}"`;
+        break;
+      case 'bullet':
+        prompt = `Summarize this content in 5-7 bullet points, highlighting the key information: "${content}"`;
+        break;
+      default:
+        prompt = `Summarize this content briefly: "${content}"`;
+    }
+    
+    // Limit content length to avoid API limits
+    const limitedContent = content.substring(0, 10000);
+    
+    // API key provided by the user
+    const apiKey = 'AIzaSyDJuseopw7-gMY5QSSm4DZZVPv1I6X9b4E';
+    
+    // Call Google's Generative AI API
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: prompt
+            text: prompt.replace('${content}', limitedContent)
           }]
         }]
       })
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`API request failed: ${response.status} ${errorData}`);
+      throw new Error(`API request failed with status: ${response.status}`);
     }
     
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    
+    // Extract summary from the response
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && 
+        data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error('Failed to extract summary from API response');
+    }
   } catch (error) {
-    console.error('API request error:', error);
-    throw new Error('Failed to summarize content. Please try again later.');
+    console.error('Summarization error:', error);
+    throw error;
   }
 }
