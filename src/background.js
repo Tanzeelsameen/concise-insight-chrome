@@ -42,7 +42,7 @@ async function summarizeContent(content, title, type) {
     // API key provided by the user
     const apiKey = 'AIzaSyDJuseopw7-gMY5QSSm4DZZVPv1I6X9b4E';
     
-    // Call Google's Generative AI API
+    // Call Google's Generative AI API with the correct endpoint
     const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
