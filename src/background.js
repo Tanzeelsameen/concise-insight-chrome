@@ -1,4 +1,3 @@
-
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'summarize') {
@@ -41,12 +40,12 @@ async function summarizeContent(content, title, type) {
     }
     
     // API key provided by the user
-    const apiKey = 'AIzaSyDJuseopw7-gMY5QSSm4DZZVPv1I6X9b4E';
+    const apiKey = 'AIzaSyDD2WyM20Jl1dtwPedQcIyb0ssVqcN_OLM'; // Replace with your API key from https://makersuite.google.com/app/apikey
 
     console.log("Preparing to send request to Gemini API");
     
-    // Updated to use the correct model name "gemini-pro" instead of "gemini-1.0-pro"
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
+    // Updated to use the correct API version v1
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
