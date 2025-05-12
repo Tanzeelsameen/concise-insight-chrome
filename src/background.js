@@ -45,8 +45,8 @@ async function summarizeContent(content, title, type) {
 
     console.log("Preparing to send request to Gemini API");
     
-    // Updated to use the correct Gemini API version
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    // Updated to use the correct Gemini API version (v1 instead of v1beta)
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
