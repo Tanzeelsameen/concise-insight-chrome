@@ -21,32 +21,32 @@ async function summarizeContent(content, title, type) {
     console.log(`Summarizing content (${type}): ${title}`);
     console.log(`Content length: ${content.length} characters`);
     
+    // Limit content length to avoid API limits
+    const limitedContent = content.substring(0, 8000);
+    
     // Prepare the prompt based on summary type
     let prompt = '';
     switch(type) {
       case 'brief':
-        prompt = `Summarize this content in 2-3 concise sentences: ${content}`;
+        prompt = `Summarize this content in 2-3 concise sentences: ${limitedContent}`;
         break;
       case 'detailed':
-        prompt = `Provide a detailed summary of this content in about 5-7 sentences, covering the main points: ${content}`;
+        prompt = `Provide a detailed summary of this content in about 5-7 sentences, covering the main points: ${limitedContent}`;
         break;
       case 'bullet':
-        prompt = `Summarize this content in 5-7 bullet points, highlighting the key information: ${content}`;
+        prompt = `Summarize this content in 5-7 bullet points, highlighting the key information: ${limitedContent}`;
         break;
       default:
-        prompt = `Summarize this content briefly: ${content}`;
+        prompt = `Summarize this content briefly: ${limitedContent}`;
     }
-    
-    // Limit content length to avoid API limits
-    const limitedContent = content.substring(0, 8000);
     
     // API key provided by the user
     const apiKey = 'AIzaSyDJuseopw7-gMY5QSSm4DZZVPv1I6X9b4E';
 
-    console.log("Sending request to Gemini API");
+    console.log("Preparing to send request to Gemini API");
     
-    // Use the proper format for Gemini API requests
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`, {
+    // Updated to use the correct Gemini API version
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +60,13 @@ async function summarizeContent(content, title, type) {
               }
             ]
           }
-        ]
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024
+        }
       })
     });
     
